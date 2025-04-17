@@ -1,0 +1,21 @@
+.toggle-checkbox {
+  background: white;
+}
+
+.toggle-checkbox:checked {
+  border-color: #34d399;
+  right: 0;
+  border-color: #68d391;
+  background: white;
+}
+.toggle-checkbox:checked + .toggle-label {
+  background-color: #34d399;
+  background-color: #68d391;
+}
+
+input:disabled,
+switch:disabled,
+textarea:disabled {
+  background-color: #e5e7eb;
+  cursor: not-allowed;
+}

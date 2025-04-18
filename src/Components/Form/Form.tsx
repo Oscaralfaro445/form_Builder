@@ -1,91 +1,111 @@
 import { useEffect, useState } from "react";
-import { FormHorientation, InputTypeId } from "../../Models";
+import { InputTypeId } from "../../Models";
 import { Input } from "../Input/Input";
 import { TooltipIcon } from "../TooltipIcon/TooltipIcon";
+import { FormikValues } from "formik";
 
-// Puedes extender esto con más propiedades si sabes qué contienen tus campos
 interface Field {
+  nomComponente: string;
   cveTipoCompon: InputTypeId;
   cveTamanoCampo: string;
-  sizeClass?: string;
+  txEtiqueta: string;
+  txAyuda?: string;
+  bRequerido: boolean;
+  infdetComp?: {
+    VALOR_INICIAL?: string;
+    NUM_LONG_MIN?: number;
+    NUM_LONG_MAX?: number;
+    TX_REG_EXP?: string;
+  };
   [key: string]: any;
 }
 
-interface FormProps {
-  value?: any;
-  formHandler: any;
-  fields: Field[];
-  position?: FormHorientation;
-  hasValidation?: boolean;
+interface FormState {
+  isLoading: boolean;
+  rows: (Field & {
+    error?: string;
+  })[];
 }
 
-const initialState = {
-  form: {},
-  isLoading: false,
-  isValid: false,
-  rows: [] as Field[],
-};
+interface FormProps {
+  fields: Field[];
+  formHandler: {
+    values: FormikValues;
+    handleChange: (e: React.ChangeEvent<any>) => void;
+    handleBlur: (e: React.FocusEvent<any>) => void;
+    touched: { [key: string]: boolean };
+    errors: { [key: string]: string };
+    handleSubmit: (e?: React.FormEvent<HTMLFormElement>) => void;
+  };
+  submitText?: string;
+}
 
-const getSizeNumberClass = (size: string) => {
-  switch (size) {
-    case "XL":
-      return 12;
-    case "LG":
-      return 9;
-    case "SM":
-      return 4;
-    case "XS":
-      return 3;
-    default:
-      return 6;
-  }
+const initialState: FormState = {
+  isLoading: false,
+  rows: [],
 };
 
 export const Form = ({
   fields,
   formHandler,
-  position = FormHorientation.HORIZONTAL,
+  submitText = "Enviar",
 }: FormProps) => {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState<FormState>(initialState);
   const { rows } = state;
 
   useEffect(() => {
-    const processedFields: Field[] = fields.map((field) => {
-      let size: number;
-
-      if (position === FormHorientation.HORIZONTAL) {
-        size =
-          field.cveTipoCompon === InputTypeId.RELATION
-            ? 12
-            : getSizeNumberClass(field.cveTamanoCampo);
-      } else {
-        size = field.cveTipoCompon === InputTypeId.SWITCH ? 4 : 12;
-      }
+    const processedFields = fields.map((field) => {
+      const error = formHandler.touched[field.nomComponente]
+        ? (formHandler.errors[field.nomComponente] as string | undefined)
+        : undefined;
 
       return {
         ...field,
-        sizeClass: `col-span-${size}`,
+        error,
       };
     });
 
-    setState((prev) => ({ ...prev, rows: processedFields }));
-  }, [fields, position]);
+    setState((prev) => ({
+      ...prev,
+      rows: processedFields,
+    }));
+  }, [fields, formHandler.errors, formHandler.touched]);
 
   return (
-    <div className="flex w-full py-6 items-center justify-between">
-      <div className="w-3/4 mt-2 grid grid-cols-2 gap-4">
+    <form
+      onSubmit={formHandler.handleSubmit}
+      className="w-full max-w-2xl mx-auto"
+    >
+      <div className="space-y-6 p-6">
         {rows.map((field) => (
-          <>
-            <Input
-              key={field.nomComponente}
-              field={field}
-              {...formHandler.getFieldProps(field.nomComponente)}
-            />
-            {console.log(field.txAyuda)}
-            {field.txAyuda && <TooltipIcon message={field.txAyuda} />}
-          </>
+          <div key={field.nomComponente} className="w-full">
+            <div className="flex flex-col space-y-2">
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <Input field={field} />
+                </div>
+                {field.txAyuda && (
+                  <div className="pt-2">
+                    <TooltipIcon message={field.txAyuda} />
+                  </div>
+                )}
+              </div>
+              {field.error && (
+                <p className="text-red-500 text-sm mt-1">{field.error}</p>
+              )}
+            </div>
+          </div>
         ))}
       </div>
-    </div>
+
+      <div className="px-6 pb-6 flex justify-end">
+        <button
+          type="submit"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition duration-150 ease-in-out"
+        >
+          {submitText}
+        </button>
+      </div>
+    </form>
   );
 };

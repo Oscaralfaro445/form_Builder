@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { FormikValues, useFormik } from "formik";
 import { Alert } from "../../Components/Alert/Alert";
 import { Button } from "../../Components/Button/Button";
-import { Form } from "../../Components/Form/Form";
 import { Modal } from "../../Components/Modal/Modal";
 import { SectionHeader } from "../../Components";
 import { SlideOver } from "../../Components/SlideOver/SlideOver";
 import { Table } from "../../Components/Table/Table";
 import { AlertState } from "../../Models/Alert/Alert";
 import { CrudAction } from "../../Models/metadata";
-import { FormHorientation } from "../../Models/metadata";
 import { getFilterFields } from "../../Utils/metadata";
 import { useMetadata } from "../../Context/useMetadata";
+import { FormStructure } from "../../Components/FormStructure/FormStructure";
 
 export const Crud = () => {
   const { formKey } = useParams();
@@ -27,19 +25,17 @@ export const Crud = () => {
     type: AlertState.ERROR,
   });
 
-  const formik = useFormik({
-    initialValues: {} as FormikValues,
-    onSubmit: (values) => {
-      console.log(values);
-    },
-  });
-
   useEffect(() => {
     fetchFormMetadata(formKey!);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey]);
 
   const handleFiltering = () => {};
+
+  const handleAccept = (values: any) => {
+    console.log("Accepted", values);
+    console.log(action);
+  };
 
   const handleCancel = () => {
     setModalOpen(false);
@@ -88,11 +84,9 @@ export const Crud = () => {
       <Table />
 
       <Modal
-        action={action}
-        open={isModalOpen}
-        handleAccept={() => {}}
+        open={true}
+        handleAccept={handleAccept}
         handleCancel={handleCancel}
-        formInitialValues={{}}
       />
 
       <Alert
@@ -102,18 +96,15 @@ export const Crud = () => {
         description={alertState.description}
         handleExit={() => setAlertState({ ...alertState, isOpen: false })}
       />
-
       <SlideOver
         isOpen={isSlideOpen}
         setOpen={setSlideOpen}
         handleFormSubmit={handleFiltering}
       >
         {metadata && (
-          <Form
-            fields={getFilterFields(metadata?.infComponente)}
-            hasValidation={false}
-            formHandler={formik}
-            position={FormHorientation.HORIZONTAL}
+          <FormStructure
+            fields={getFilterFields(metadata.infComponente)}
+            onSubmit={() => {}}
           />
         )}
       </SlideOver>

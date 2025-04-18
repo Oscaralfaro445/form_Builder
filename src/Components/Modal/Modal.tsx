@@ -4,55 +4,61 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useEffect, useRef } from "react";
-import { CrudAction } from "../../Models/metadata";
+import { Fragment, useRef } from "react";
 import { useMetadata } from "../../Context/useMetadata";
-import { FormikValues, useFormik } from "formik";
-import { Window } from "../Window/Window";
+import { FormStructure } from "../FormStructure/FormStructure";
 
 type ModalProps = {
   open: boolean;
-  action: CrudAction;
   handleCancel: () => void;
-  handleAccept: (a: any) => void;
-  formInitialValues: { [key: string]: any };
+  handleAccept: (values: any) => void;
+  formInitialValues?: { [key: string]: any };
 };
 
 export const Modal = ({
   open,
-  action,
   formInitialValues,
   handleAccept,
   handleCancel,
 }: ModalProps) => {
   const { metadata } = useMetadata();
-
   const cancelButtonRef = useRef(null);
-  const formik = useFormik({
-    initialValues: {} as FormikValues,
-    onSubmit: (values) => {
-      console.log(values);
-    },
-  });
 
-  const getInitualValues = (formInitialValues: any, metadata: any) => {
-    console.log("FormInitialValues", formInitialValues, "metadata", metadata);
+  // Función para obtener valores iniciales dinámicos
+  const getInitialValues = (initialValues: any, metadata: any) => {
+    if (!metadata?.infComponente) return initialValues;
+
+    const dynamicValues = metadata.infComponente.reduce(
+      (acc: any, field: any) => {
+        acc[field.nomComponente] =
+          initialValues[field.nomComponente] ||
+          field.infdetComp?.VALOR_INICIAL ||
+          "";
+        return acc;
+      },
+      {},
+    );
+
+    return { ...dynamicValues, ...initialValues };
   };
 
-  useEffect(() => {
-    if (!metadata) return;
-
-    const formValue = getInitualValues(formInitialValues, metadata);
-    formik.setValues(formValue as any, false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formInitialValues, metadata]);
+  // Función para manejar el submit del formulario
+  const handleSubmit = (values: any) => {
+    handleAccept(values);
+  };
 
   const renderView = () => {
+    if (!metadata?.infComponente) return null;
+
     switch (metadata?.infoForma.cveTipoForma) {
       case "VENTANA":
-        return <Window action={action} formHandler={formik} />;
+        return (
+          <FormStructure fields={metadata.infComponente} onSubmit={() => {}} />
+        );
       default:
-        return null;
+        return (
+          <FormStructure fields={metadata.infComponente} onSubmit={() => {}} />
+        );
     }
   };
 
@@ -62,7 +68,7 @@ export const Modal = ({
         as="div"
         className="fixed z-10 inset-0 overflow-y-auto"
         initialFocus={cancelButtonRef}
-        onClose={() => {}}
+        onClose={handleCancel}
       >
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 text-center sm:block sm:p-0">
           <TransitionChild
@@ -106,7 +112,13 @@ export const Modal = ({
                 <button
                   type="button"
                   className="w-full inline-flex items-center justify-center rounded-md border shadow-sm px-4 text-base font-medium text-gray-500 border-gray-400 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => handleAccept(formik.values)}
+                  onClick={() => {
+                    // Obtener el formulario del DOM y disparar el submit
+                    const form = document.querySelector("form");
+                    form?.dispatchEvent(
+                      new Event("submit", { cancelable: true }),
+                    );
+                  }}
                 >
                   Aceptar
                 </button>

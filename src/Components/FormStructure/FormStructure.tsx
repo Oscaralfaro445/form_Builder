@@ -4,14 +4,12 @@ import * as Yup from "yup";
 
 interface FormStructureProps {
   fields: any[];
-  onSubmit: (values: any, helpers: any) => void;
-  initialValues?: Record<string, any>;
+  handleSubmit: (values: any, helpers: any) => void;
 }
 
 export const FormStructure = ({
   fields,
-  onSubmit,
-  initialValues: externalInitialValues,
+  handleSubmit: onSubmit,
 }: FormStructureProps) => {
   const defaultInitialValues = fields.reduce(
     (acc, field) => {
@@ -21,22 +19,20 @@ export const FormStructure = ({
     {} as Record<string, any>,
   );
 
+  console.log("defaultInitialValues", defaultInitialValues);
+
   const validationSchema = Yup.object().shape(
     fields.reduce(
       (acc, field) => {
-        if (!field.bRequerido) return acc;
+        if (!field.bRequerido && !field.infdetComp) return acc;
 
-        let validator = Yup.string().required(
-          `${field.txEtiqueta} es requerido`,
-        );
-
-        if (field.infdetComp) {
-          if (field.infdetComp.NUM_LONG_MIN) {
-            validator = validator.min(
-              field.infdetComp.NUM_LONG_MIN,
-              `Mínimo ${field.infdetComp.NUM_LONG_MIN} carácteres`,
-            );
-          }
+        let validator: Yup.AnySchema;
+        switch (field.cveTipoCampo) {
+          case "number":
+            validator = Yup.number().required("Campo requerido");
+            break;
+          default:
+            validator = Yup.string();
         }
 
         acc[field.nomComponente] = validator;
@@ -46,8 +42,10 @@ export const FormStructure = ({
     ),
   );
 
+  console.log("validationSchema", validationSchema);
+
   const formik = useFormik({
-    initialValues: externalInitialValues || defaultInitialValues,
+    initialValues: defaultInitialValues,
     validationSchema,
     onSubmit,
     enableReinitialize: true,

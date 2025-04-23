@@ -15,61 +15,98 @@ import { FormStructure } from "../../Components/FormStructure/FormStructure";
 export const Crud = () => {
   const { formKey } = useParams();
   const { fetchFormMetadata, metadata } = useMetadata();
+
   const [action, setAction] = useState(CrudAction.CREATE);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isSlideOpen, setSlideOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState<any>({
+    row: null,
+    data: {},
+  });
   const [alertState, setAlertState] = useState({
-    isOpen: true,
-    description: "ERROR",
-    title: "Este error es un ejemplo del componente Alert",
+    isOpen: false,
+    description: "",
+    title: "",
     type: AlertState.ERROR,
   });
 
   useEffect(() => {
     fetchFormMetadata(formKey!);
+    setSelectedRow({ row: null, data: {} });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey]);
 
   const handleFiltering = () => {};
 
-  const handleAccept = (values: any) => {
-    console.log("Accepted", values);
-    console.log(action);
+  const handleSelectedRow = (row: number, data: any) => {
+    if (row === selectedRow.row) {
+      setSelectedRow({ row: null, data: {} });
+      return;
+    }
+
+    setSelectedRow({ row, data });
   };
 
   const handleCancel = () => {
     setModalOpen(false);
   };
 
+  const handleCreate = () => {};
+
+  const handleUpdate = () => {
+    setAlertState({
+      isOpen: true,
+      description: "Se actualizo el registro correctamente",
+      title: "Completado",
+      type: AlertState.SUCCESS,
+    });
+  };
+  const handleDelete = () => {};
+
+  const getCrudHandler =
+    action === CrudAction.CREATE ? handleCreate : handleUpdate;
+
   return (
     <div className="w-full relative">
       <SectionHeader>
         <SectionHeader.Details
-          title="Forma"
-          description="En esta forma podrás realizar el llenado de una quiniela"
+          title={metadata?.infoForma.txTituloForma}
+          description={metadata?.infoForma.descForma}
         />
         <SectionHeader.Buttons>
-          <Button
-            theme="danger"
-            title="Eliminar"
-            icon="trash-alt"
-            onClick={() => {}}
-          />
-          <Button
-            theme="normal"
-            title="Agregar"
-            icon="plus"
-            onClick={() => {
-              setAction(CrudAction.CREATE);
-              setModalOpen(true);
-            }}
-          />
-          <Button
-            theme="primary"
-            title="Editar"
-            icon="pen-fancy"
-            onClick={() => {}}
-          />
+          {selectedRow.row !== null && (
+            <Button
+              theme="danger"
+              title="Eliminar"
+              icon="trash-alt"
+              onClick={() => handleDelete()}
+            />
+          )}
+          {selectedRow.row === null && (
+            <Button
+              theme="normal"
+              title="Agregar"
+              icon="plus"
+              onClick={() => {
+                setAction(CrudAction.CREATE);
+                setModalOpen(true);
+              }}
+            />
+          )}
+          {selectedRow.row !== null && (
+            <Button
+              theme="primary"
+              title="Editar"
+              icon="pen-fancy"
+              onClick={() => {
+                setAction(CrudAction.UPDATE);
+                setModalOpen(true);
+              }}
+            />
+          )}
+
+          <div className="border-l border-gray-200 h-12 ml-1 mr-2 w-1 "></div>
+
           <Button
             theme="primary"
             title="Filtros"
@@ -81,11 +118,14 @@ export const Crud = () => {
         </SectionHeader.Buttons>
       </SectionHeader>
 
-      <Table />
+      <Table
+        selectedRow={selectedRow.row}
+        handleSelectedRow={handleSelectedRow}
+      />
 
       <Modal
-        open={true}
-        handleAccept={handleAccept}
+        open={isModalOpen}
+        handleAccept={getCrudHandler}
         handleCancel={handleCancel}
       />
 
@@ -96,6 +136,7 @@ export const Crud = () => {
         description={alertState.description}
         handleExit={() => setAlertState({ ...alertState, isOpen: false })}
       />
+
       <SlideOver
         isOpen={isSlideOpen}
         setOpen={setSlideOpen}

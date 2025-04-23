@@ -56,7 +56,6 @@ export const Combo = ({ field, ...props }: any) => {
 
     if (field.value !== "") {
       const defaultOption = findOption(field.value, data);
-      console.log(defaultOption);
       if (defaultOption) {
         setSelection({
           value: defaultOption[field.value],
@@ -74,9 +73,6 @@ export const Combo = ({ field, ...props }: any) => {
 
   return (
     <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
       <div id="select-button" className="w-full relative">
         <div
           className={`mt-1 px-4 p-2 flex cursor-pointer justify-between rounded-md shadow-sm items-center bg-white border focus:border-indigo-700 border-gray-300 focus:ring-0 ${field.isDisabled ? "bg-gray-200 cursor-not-allowed" : ""}`}

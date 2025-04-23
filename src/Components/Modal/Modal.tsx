@@ -12,39 +12,15 @@ type ModalProps = {
   open: boolean;
   handleCancel: () => void;
   handleAccept: (values: any) => void;
-  formInitialValues?: { [key: string]: any };
 };
 
-export const Modal = ({
-  open,
-  formInitialValues,
-  handleAccept,
-  handleCancel,
-}: ModalProps) => {
+export const Modal = ({ open, handleAccept, handleCancel }: ModalProps) => {
   const { metadata } = useMetadata();
   const cancelButtonRef = useRef(null);
 
-  // Función para obtener valores iniciales dinámicos
-  const getInitialValues = (initialValues: any, metadata: any) => {
-    if (!metadata?.infComponente) return initialValues;
-
-    const dynamicValues = metadata.infComponente.reduce(
-      (acc: any, field: any) => {
-        acc[field.nomComponente] =
-          initialValues[field.nomComponente] ||
-          field.infdetComp?.VALOR_INICIAL ||
-          "";
-        return acc;
-      },
-      {},
-    );
-
-    return { ...dynamicValues, ...initialValues };
-  };
-
-  // Función para manejar el submit del formulario
   const handleSubmit = (values: any) => {
     handleAccept(values);
+    console.log("Valores enviados:", values);
   };
 
   const renderView = () => {
@@ -53,11 +29,17 @@ export const Modal = ({
     switch (metadata?.infoForma.cveTipoForma) {
       case "VENTANA":
         return (
-          <FormStructure fields={metadata.infComponente} onSubmit={() => {}} />
+          <FormStructure
+            fields={metadata.infComponente}
+            handleSubmit={handleSubmit}
+          />
         );
       default:
         return (
-          <FormStructure fields={metadata.infComponente} onSubmit={() => {}} />
+          <FormStructure
+            fields={metadata.infComponente}
+            handleSubmit={handleSubmit}
+          />
         );
     }
   };
@@ -110,15 +92,9 @@ export const Modal = ({
 
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
-                  type="button"
+                  type="submit"
                   className="w-full inline-flex items-center justify-center rounded-md border shadow-sm px-4 text-base font-medium text-gray-500 border-gray-400 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => {
-                    // Obtener el formulario del DOM y disparar el submit
-                    const form = document.querySelector("form");
-                    form?.dispatchEvent(
-                      new Event("submit", { cancelable: true }),
-                    );
-                  }}
+                  onClick={() => {}}
                 >
                   Aceptar
                 </button>

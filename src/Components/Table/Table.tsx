@@ -3,7 +3,13 @@ import { Grid } from "../Grid/Grid";
 import { Paginator } from "../Paginator/Paginator";
 import { Header } from "./Header/Header";
 
-export const Table = () => {
+export const Table = ({
+  selectedRow,
+  handleSelectedRow,
+}: {
+  selectedRow: number | null;
+  handleSelectedRow: any;
+}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 10;
 
@@ -15,7 +21,11 @@ export const Table = () => {
         currentPage={currentPage}
         totalPages={totalPages}
       />
-      <Grid currentPage={currentPage} />
+      <Grid
+        currentPage={currentPage}
+        selectedRow={selectedRow}
+        handleSelectedRow={handleSelectedRow}
+      />
     </div>
   );
 };

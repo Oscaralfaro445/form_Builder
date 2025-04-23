@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { InputTypeId, GenericField } from "../../Models";
 import { Combo } from "../Combo/Combo"; //
@@ -6,18 +7,45 @@ import "./Input.css";
 
 type InputProps = {
   field: any;
+  value: any;
+  onChange: (e: React.ChangeEvent<any>) => void;
+  onBlur: (e: React.FocusEvent<any>) => void;
+  [key: string]: any;
 };
 
-export const Input = ({ field, ...props }: InputProps) => {
-  console.log(field.cveTipoCompon);
+export const Input = ({
+  field,
+  value,
+  onChange,
+  onBlur,
+  ...props
+}: InputProps) => {
+  const [show, setShow] = useState(false);
+
   const renderInput = () => {
     if (!field) return null;
 
     switch (field.cveTipoCompon) {
       case InputTypeId.TEXTO:
-        return <TextInput field={field} {...props} />;
+        return (
+          <TextInput
+            field={field}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            {...props}
+          />
+        );
       case InputTypeId.NUMERO:
-        return <NumberInput field={field} {...props} />;
+        return (
+          <NumberInput
+            field={field}
+            value={value}
+            onChange={onChange}
+            onBlur={onBlur}
+            {...props}
+          />
+        );
       case InputTypeId.FECHA:
         return <FechaInput field={field} {...props} />;
       case InputTypeId.AREA:
@@ -38,16 +66,26 @@ export const Input = ({ field, ...props }: InputProps) => {
 
   return (
     <div className={`col-span-12 sm:${field.sizeClass} relative`}>
-      {field.cmpType !== InputTypeId.RELATION && (
+      {field.cveTipoCompon !== InputTypeId.RELATION && (
         <div className="flex items-center">
           <label className="block text-sm font-medium text-gray-600 mr-4">
-            {field.label}
+            {field.txEtiqueta}
           </label>
-          {field.helpText ? (
-            <FontAwesomeIcon
-              className="text-gray-300 absolute bottom-3 right-4"
-              icon={["fas", "question-circle"]}
-            />
+          {field.txAyuda ? (
+            <div
+              onMouseEnter={() => setShow(true)}
+              onMouseLeave={() => setShow(false)}
+            >
+              <FontAwesomeIcon
+                className="text-blue-600 absolute bottom-3 right-4"
+                icon={["fas", "question-circle"]}
+              />
+              {show && (
+                <div className="absolute left-full top-1/2 ml-2 -translate-y-1/2 bg-gray-800 text-white text-xs rounded-md px-2 py-1 shadow-lg z-10 w-44">
+                  {field.txAyuda}
+                </div>
+              )}
+            </div>
           ) : null}
         </div>
       )}
@@ -56,93 +94,77 @@ export const Input = ({ field, ...props }: InputProps) => {
   );
 };
 
-const TextInput = ({ field, ...props }: { field: any }) => {
+const TextInput = ({ field, value, onChange, onBlur, ...props }: any) => {
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
-      <input
-        type="text"
-        name={field.fieldName}
-        disabled={field.isDisabled}
-        {...props}
-        className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-      />
-    </div>
+    <input
+      type="text"
+      name={field.nomComponente}
+      id={field.nomComponente}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      disabled={field.isDisabled}
+      className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
+      {...props}
+    />
   );
 };
 
-const NumberInput = ({ field, ...props }: { field: any }) => {
+const NumberInput = ({ field, value, onChange, onBlur, ...props }: any) => {
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
-      <input
-        type="number"
-        name={field.fieldName}
-        disabled={field.isDisabled}
-        {...props}
-        className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-      />
-    </div>
+    <input
+      type="number"
+      name={field.fieldName}
+      id={field.fieldName}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      disabled={field.isDisabled}
+      className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
+      {...props}
+    />
   );
 };
 
 const FechaInput = ({ field, ...props }: { field: any }) => {
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
-      <input
-        type="date"
-        name={field.fieldName}
-        disabled={field.isDisabled}
-        {...props}
-        className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-      />
-    </div>
+    <input
+      type="date"
+      name={field.fieldName}
+      disabled={field.isDisabled}
+      {...props}
+      className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
+    />
   );
 };
 
 const Area = ({ field, ...props }: { field: any }) => {
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
-      <textarea
-        name={field.fieldName}
-        disabled={field.isDisabled}
-        className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-        {...props}
-      />
-    </div>
+    <textarea
+      name={field.fieldName}
+      disabled={field.isDisabled}
+      className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
+      {...props}
+    />
   );
 };
 
-const Switch = ({ field, ...props }: any) => {
+const Switch = ({ field, value, onChange, ...props }: any) => {
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <label className="text-sm font-medium text-gray-600 w-1/4">
-        {field.txEtiqueta}
-      </label>
-      <div className="relative inline-block w-10 mr-2 pt-3 align-middle select-none transition duration-700 ease-in">
-        <input
-          type="checkbox"
-          name={field.fieldName}
-          disabled={field.isDisabled}
-          checked={props.value}
-          className="toggle-checkbox absolute block w-5 h-5 border-gray-300 rounded-full bg-white focus:ring-offset-0 focus:ring-0 hover:bg-white appearance-none cursor-pointer"
-          {...props}
-        />
-        <label
-          htmlFor="toggle"
-          className="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"
-        />
-      </div>
+    <div className="relative inline-block w-10 mr-2 pt-3 align-middle select-none transition duration-700 ease-in">
+      <input
+        type="checkbox"
+        name={field.fieldName}
+        checked={value}
+        onChange={onChange}
+        disabled={field.isDisabled}
+        className="toggle-checkbox absolute block w-5 h-5 border-gray-300 rounded-full bg-white focus:ring-offset-0 focus:ring-0 hover:bg-white appearance-none cursor-pointer"
+        {...props}
+      />
+      <label
+        htmlFor="toggle"
+        className="toggle-label block overflow-hidden h-5 rounded-full bg-gray-200 cursor-pointer"
+      />
     </div>
   );
 };

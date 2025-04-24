@@ -6,9 +6,11 @@ import { Header } from "./Header/Header";
 export const Table = ({
   selectedRow,
   handleSelectedRow,
+  externalLoading,
 }: {
   selectedRow: number | null;
   handleSelectedRow: any;
+  externalLoading: boolean;
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 10;
@@ -25,6 +27,7 @@ export const Table = ({
         currentPage={currentPage}
         selectedRow={selectedRow}
         handleSelectedRow={handleSelectedRow}
+        externalLoading={externalLoading}
       />
     </div>
   );

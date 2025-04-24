@@ -1,22 +1,26 @@
 import { useEffect, useState } from "react";
+import { Spinner } from "../Spinner/Spinner";
 
 interface GridProps {
   currentPage: number;
   selectedRow: number | null;
   handleSelectedRow: (row: number | null, data: any) => void;
+  externalLoading: boolean;
 }
 
 export const Grid = ({
   currentPage,
   selectedRow,
   handleSelectedRow,
+  externalLoading,
 }: GridProps) => {
   const [data, setData] = useState([]);
 
   const fetchData = async () => {
     try {
       const response = await fetch(
-        `http://localhost:3002/api/table?skip=${(currentPage - 1) * 10}&take=5`,
+        //`http://localhost:3002/api/table?skip=${(currentPage - 1) * 10}&take=5`,
+        "https://6806ecece81df7060eb85ba3.mockapi.io/api/v1/dataTable/",
       );
 
       if (!response.ok) {
@@ -35,10 +39,18 @@ export const Grid = ({
     fetchData();
     handleSelectedRow(null, {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage]);
+  }, [currentPage, externalLoading]);
+
+  if (externalLoading)
+    return (
+      <div className="w-full h-52 my-4 flex justify-center items-center">
+        {" "}
+        <Spinner size="md" />
+      </div>
+    );
 
   return (
-    <div className="p-4 align-middle inline-block min-w-full">
+    <div className="p-4 align-middle inline-block min-w-full bg-gray-500">
       <div className="overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

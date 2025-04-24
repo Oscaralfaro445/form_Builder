@@ -12,7 +12,7 @@ interface ButtonProps {
 
 export const Button = ({
   onClick,
-  theme = "primary",
+  theme,
   title,
   icon,
   flow = "",

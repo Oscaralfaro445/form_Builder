@@ -6,7 +6,7 @@ export const Dashboard = () => {
   return (
     <div className="w-full h-screen fixed">
       <Navbar />
-      <div className="flex h-full overflow-y-auto bg-gray-100">
+      <div className="flex h-full overflow-y-auto bg-red-400">
         <Sidebar route="home" />
         <div className="w-full h-screen py-4 px-7">
           <Routes>

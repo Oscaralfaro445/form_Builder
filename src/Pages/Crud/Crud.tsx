@@ -8,15 +8,14 @@ import { SlideOver } from "../../Components/SlideOver/SlideOver";
 import { Table } from "../../Components/Table/Table";
 import { AlertState } from "../../Models/Alert/Alert";
 import { CrudAction } from "../../Models/metadata";
-import { getFilterFields } from "../../Utils/metadata";
 import { useMetadata } from "../../Context/useMetadata";
-import { FormStructure } from "../../Components/FormStructure/FormStructure";
 
 export const Crud = () => {
   const { formKey } = useParams();
   const { fetchFormMetadata, metadata } = useMetadata();
 
   const [action, setAction] = useState(CrudAction.CREATE);
+  const [isFetching, setIsFetching] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
   const [isSlideOpen, setSlideOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>({
@@ -48,26 +47,84 @@ export const Crud = () => {
   };
 
   const handleCancel = () => {
+    setSelectedRow({ row: null, data: {} });
     setModalOpen(false);
   };
 
-  const handleCreate = () => {};
+  const handleCreate = (values: any) => {
+    try {
+      setIsFetching(true);
+      console.log("Valores del formulario", values);
+      // Se hace la llamada a la API para crear el registro
+      setIsFetching(false);
+      setModalOpen(false);
+      setAlertState({
+        isOpen: true,
+        description: "Se creo correctamente el registro",
+        title: "Completado",
+        type: AlertState.SUCCESS,
+      });
+    } catch (error) {
+      setIsFetching(false);
+      setAlertState({
+        isOpen: true,
+        description: `Ocurrio un error al crear el registro (${error})`,
+        title: "Error",
+        type: AlertState.ERROR,
+      });
+    }
+  };
 
   const handleUpdate = () => {
-    setAlertState({
-      isOpen: true,
-      description: "Se actualizo el registro correctamente",
-      title: "Completado",
-      type: AlertState.SUCCESS,
-    });
+    try {
+      setIsFetching(true);
+      // Se hace la llamada a la API para actualizar el registro
+      setIsFetching(false);
+      setModalOpen(false);
+      setAlertState({
+        isOpen: true,
+        description: "Se actualizo el registro correctamente",
+        title: "Completado",
+        type: AlertState.SUCCESS,
+      });
+    } catch (error) {
+      setIsFetching(false);
+      setAlertState({
+        isOpen: true,
+        description: `Ocurrio un error al actualizar el registro (${error})`,
+        title: "Error",
+        type: AlertState.ERROR,
+      });
+    }
   };
-  const handleDelete = () => {};
+  const handleDelete = () => {
+    try {
+      setIsFetching(true);
+      // Se hace la llamada a la API para eliminar el registro
+      setIsFetching(false);
+      setModalOpen(false);
+      setAlertState({
+        isOpen: true,
+        description: "Se actualizo el registro correctamente",
+        title: "Completado",
+        type: AlertState.SUCCESS,
+      });
+    } catch (error) {
+      setIsFetching(false);
+      setAlertState({
+        isOpen: true,
+        description: `Ocurrio un error al actualizar el registro (${error})`,
+        title: "Error",
+        type: AlertState.ERROR,
+      });
+    }
+  };
 
   const getCrudHandler =
     action === CrudAction.CREATE ? handleCreate : handleUpdate;
 
   return (
-    <div className="w-full relative">
+    <div className="w-full relative bg-amber-500">
       <SectionHeader>
         <SectionHeader.Details
           title={metadata?.infoForma.txTituloForma}
@@ -121,12 +178,15 @@ export const Crud = () => {
       <Table
         selectedRow={selectedRow.row}
         handleSelectedRow={handleSelectedRow}
+        externalLoading={isFetching}
       />
 
       <Modal
+        action={action}
         open={isModalOpen}
         handleAccept={getCrudHandler}
         handleCancel={handleCancel}
+        formInitialValues={selectedRow.data}
       />
 
       <Alert
@@ -141,14 +201,7 @@ export const Crud = () => {
         isOpen={isSlideOpen}
         setOpen={setSlideOpen}
         handleFormSubmit={handleFiltering}
-      >
-        {metadata && (
-          <FormStructure
-            fields={getFilterFields(metadata.infComponente)}
-            onSubmit={() => {}}
-          />
-        )}
-      </SlideOver>
+      />
     </div>
   );
 };

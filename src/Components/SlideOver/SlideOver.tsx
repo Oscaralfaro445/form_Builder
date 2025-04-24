@@ -7,13 +7,16 @@ import {
 } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button } from "../Button/Button";
+import { FormWrapper } from "../FormWrapper/FormWrapper";
+import { getFilterFields } from "../../Utils/metadata";
+import { useMetadata } from "../../Context/useMetadata";
+import { Form } from "../Form/Form";
 
-export const SlideOver = ({
-  isOpen,
-  setOpen,
-  children,
-  handleFormSubmit,
-}: any) => {
+export const SlideOver = ({ isOpen, setOpen, handleFiltering }: any) => {
+  const { metadata } = useMetadata();
+  const fieldsFiltering = getFilterFields(metadata?.infComponente || []);
+  console.log("fieldsFiltering", fieldsFiltering);
+
   return (
     <Transition show={isOpen}>
       <Dialog className="fixed inset-0 overflow-hidden z-50" onClose={setOpen}>
@@ -64,19 +67,31 @@ export const SlideOver = ({
                 </div>
 
                 {/* Contenido */}
-                <div className="mt-6 relative flex-1 px-4 sm:px-6">
-                  <div className="mt-5 md:mt-0 md:col-span-2">{children}</div>
-                </div>
+                <FormWrapper
+                  initialValues={{}}
+                  onSubmit={handleFiltering}
+                  fields={fieldsFiltering}
+                >
+                  {(formik: any) => (
+                    <>
+                      <div className="mt-6 relative flex-1 px-4 sm:px-6">
+                        <div className="mt-5 md:mt-0 md:col-span-2">
+                          <Form fields={fieldsFiltering} />
+                        </div>
+                      </div>
 
-                {/* Footer */}
-                <div className="p-6 bg-gray-100 rounded-md">
-                  <Button
-                    title="Filtrar"
-                    icon="filter"
-                    onClick={handleFormSubmit}
-                    theme="primary"
-                  />
-                </div>
+                      {/* Footer */}
+                      <div className="p-6  bg-gray-100 rounded-md">
+                        <Button
+                          title="Filtrar"
+                          icon="filter"
+                          onClick={() => handleFiltering(formik.values)}
+                          theme="primary"
+                        />
+                      </div>
+                    </>
+                  )}
+                </FormWrapper>
               </DialogPanel>
             </TransitionChild>
           </div>

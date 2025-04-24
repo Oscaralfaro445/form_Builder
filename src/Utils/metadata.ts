@@ -42,8 +42,14 @@ const getForm = (key: string) => {
   return JSON.parse(parseValue);
 };
 
+export const getHeaderRows = (fields: any) => {
+  return fields.filter((field: any) => field.bGrid);
+};
+
 export const getFilterFields = (fields: any) => {
+  if (!fields) return [];
+
   return fields
-    .filter((field: any) => field.bFiltra)
+    .filter((field: any) => field?.bFiltra)
     .map((field: any) => ({ ...field, cveTamanoCampo: "SM" }));
 };

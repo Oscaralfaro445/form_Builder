@@ -35,7 +35,9 @@ export const Crud = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formKey]);
 
-  const handleFiltering = () => {};
+  const handleFiltering = (values: any) => {
+    console.log("Valores del formulario para filtros", values);
+  };
 
   const handleSelectedRow = (row: number, data: any) => {
     if (row === selectedRow.row) {
@@ -75,10 +77,12 @@ export const Crud = () => {
     }
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = (values: any) => {
     try {
       setIsFetching(true);
       // Se hace la llamada a la API para actualizar el registro
+      console.log("Valores del formulario", values);
+
       setIsFetching(false);
       setModalOpen(false);
       setAlertState({
@@ -124,7 +128,7 @@ export const Crud = () => {
     action === CrudAction.CREATE ? handleCreate : handleUpdate;
 
   return (
-    <div className="w-full relative bg-amber-500">
+    <div className="w-full relative">
       <SectionHeader>
         <SectionHeader.Details
           title={metadata?.infoForma.txTituloForma}
@@ -200,7 +204,7 @@ export const Crud = () => {
       <SlideOver
         isOpen={isSlideOpen}
         setOpen={setSlideOpen}
-        handleFormSubmit={handleFiltering}
+        handleFiltering={handleFiltering}
       />
     </div>
   );

@@ -19,8 +19,8 @@ export const Grid = ({
   const fetchData = async () => {
     try {
       const response = await fetch(
-        //`http://localhost:3002/api/table?skip=${(currentPage - 1) * 10}&take=5`,
-        "https://6806ecece81df7060eb85ba3.mockapi.io/api/v1/dataTable/",
+        `http://localhost:3002/api/table?skip=${(currentPage - 1) * 10}&take=5`,
+        //s"https://6806ecece81df7060eb85ba3.mockapi.io/api/v1/dataTable/",
       );
 
       if (!response.ok) {
@@ -50,7 +50,7 @@ export const Grid = ({
     );
 
   return (
-    <div className="p-4 align-middle inline-block min-w-full bg-gray-500">
+    <div className="p-4 align-middle inline-block min-w-full">
       <div className="overflow-x-auto sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">

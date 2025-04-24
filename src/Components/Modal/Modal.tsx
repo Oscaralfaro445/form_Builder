@@ -28,6 +28,8 @@ export const Modal = ({
   const { metadata } = useMetadata();
   const cancelButtonRef = useRef(null);
 
+  const initialValues = formInitialValues || {};
+
   const renderView = () => {
     switch (metadata?.infoForma?.cveTipoForma) {
       case "VENTANA":
@@ -75,9 +77,7 @@ export const Modal = ({
           >
             <DialogPanel className="inline-block align-bottom bg-red-400 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-5/6">
               <FormWrapper
-                initialValues={() => {
-                  console.log(formInitialValues);
-                }}
+                initialValues={initialValues}
                 onSubmit={handleAccept}
                 fields={metadata?.infComponente}
               >

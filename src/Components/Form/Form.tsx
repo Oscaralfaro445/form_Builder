@@ -9,7 +9,7 @@ export const Form = ({ fields }: FormProps) => {
   const formik = useFormikContext<FormikValues>();
 
   return (
-    <div className="w-full py-6 space-y-4">
+    <div className="w-full max-w-2xl py-6 space-y-4">
       {fields.map((field: any) => (
         <div key={field.nomComponente} className="w-full">
           {/* Input con todas las props necesarias para Formik */}

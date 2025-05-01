@@ -1,120 +1,147 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useCallback, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
-const initialState = {
-  loading: false,
-  options: [] as any,
-};
+interface ComboProps {
+  field: any;
+  name: string;
+  value: any;
+  onChange: (e: ChangeEvent<any>) => void;
+  onBlur: (e: React.FocusEvent<any>) => void;
+  disabled?: boolean;
+}
 
-export const Combo = ({ field, ...props }: any) => {
-  const [state, setState] = useState(initialState);
+interface Option {
+  [key: string]: any; // Opción genérica
+}
+
+export const Combo = ({
+  field,
+  name,
+  value,
+  onChange,
+  onBlur,
+  disabled,
+}: ComboProps) => {
+  const [options, setOptions] = useState<Option[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [selection, setSelection] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
 
-  const { options } = state;
+  // Cargar opciones al montar el componente
+  useEffect(() => {
+    const fetchOptions = async () => {
+      setLoading(true);
+      try {
+        let data: Option[] = [];
 
-  const isCurrentSelection = (option: any) => {
-    return selection && selection.value === option[field.value];
-  };
+        if (field.completeUrl) {
+          const response = await fetch(field.completeUrl);
+          const json = await response.json();
+          data = json.data || json;
+        } else if (field.endpoint) {
+          const response = await fetch(`http://localhost:3002/api/`);
+          const json = await response.json();
+          data = json.data || json;
+        } else {
+          // Datos de ejemplo
+          data = [
+            { [field.value]: "1", [field.key]: "Opción 1" },
+            { [field.value]: "2", [field.key]: "Opción 2" },
+          ];
+        }
 
-  const handleSelection = (option: any) => {
-    props.onChange({
-      target: { name: field.fieldName, value: option[field.value] },
-    });
+        console.log("DATA", data);
 
-    setSelection({ value: option[field.value], key: option[field.key] });
+        setOptions(data);
+      } catch (error) {
+        console.error("Error fetching combo options:", error);
+        setOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOptions();
+  }, [field.completeUrl, field.endpoint, field.key, field.value]);
+
+  // Manejar selección
+  const handleSelect = (option: Option) => {
+    const selectedValue = option[field.value];
+    const event = {
+      target: {
+        id: { name },
+        name,
+        value: selectedValue,
+        type: "change",
+      },
+    } as ChangeEvent<any>;
+
+    onChange(event);
+
     setIsOpen(false);
   };
 
-  const findOption = useCallback(
-    (val: any, data: any) => {
-      return data.find((opt: any) => {
-        return opt[field.value] === val;
-      });
-    },
-    [field],
-  );
-
-  const fetchData = useCallback(async () => {
-    let data;
-
-    setState((prevState) => ({ ...prevState, loading: true }));
-
-    if (field.completeUrl) {
-      const response = await fetch(field.completeUrl);
-      const options = await response.json();
-      data = options.data;
-    } else if (field.endpoint) {
-      const response = await fetch(
-        `http://cs360-env.eba-uiktmyhc.us-east-1.elasticbeanstalk.com/api/${field.endpoint}`,
-      );
-      const options = await response.json();
-      data = options.data;
-    } else {
-      data = field.data;
-    }
-
-    if (field.value !== "") {
-      const defaultOption = findOption(field.value, data);
-      if (defaultOption) {
-        setSelection({
-          value: defaultOption[field.value],
-          key: defaultOption[field.key],
-        });
-      }
-    }
-
-    setState({ options: data, loading: true });
-  }, [field, findOption]);
-
-  useEffect(() => {
-    fetchData();
-  }, [field, fetchData]);
+  // Encontrar la opción seleccionada actualmente
+  const selectedOption = options.find((opt) => opt[field.value] === value);
 
   return (
-    <div className="flex flex-row items-center w-full gap-2">
-      <div id="select-button" className="w-full relative">
-        <div
-          className={`mt-1 px-4 p-2 flex cursor-pointer justify-between rounded-md shadow-sm items-center bg-white border focus:border-indigo-700 border-gray-300 focus:ring-0 ${field.isDisabled ? "bg-gray-200 cursor-not-allowed" : ""}`}
-          onClick={() => {
-            if (!field.isDisabled) setIsOpen(!isOpen);
-          }}
-        >
-          <div id="selected-value" className="flex flex-col">
-            <p className="text-sm font-medium text-gray-500">
-              {selection ? selection.value : "Selecciona una opción..."}
-            </p>
-          </div>
-          <div id="chevrons" className="flex flex-col w-max">
-            <FontAwesomeIcon
-              className="text-xs text-gray-400"
-              icon={["fas", "chevron-down"]}
-            />
-          </div>
-        </div>
-        {isOpen && (
-          <div className="absolute bg-white w-full options mt-2 border border-gray-200 z-20 rounded-md h-auto max-h-60 overflow-y-auto">
-            <ul className="text-sm text-main-font">
-              {options.length > 0 &&
-                options.map((option: any) => (
-                  <div
-                    key={option.key}
-                    className={`${isCurrentSelection(option) && "bg-indigo-50"} flex w-full px-4 py-2 justify-between items-center hover:bg-indigo-50 cursor-pointer`}
-                    onClick={() => handleSelection(option)}
-                  >
-                    <li>{option.value}</li>
-                    {isCurrentSelection(option) && (
-                      <FontAwesomeIcon
-                        className="text-sm text-indigo-700"
-                        icon={["fas", "check"]}
-                      />
-                    )}
-                  </div>
-                ))}
-            </ul>
-          </div>
-        )}
+    <div className="relative w-full">
+      {/* Input del combo */}
+      <div
+        className={`mt-1 px-4 py-2 flex justify-between items-center rounded-md border border-gray-300 bg-white shadow-sm cursor-pointer ${
+          disabled ? "bg-gray-100 cursor-not-allowed" : ""
+        }`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onBlur={onBlur}
+        id={name}
+        tabIndex={0}
+      >
+        <span className="text-sm font-medium text-gray-700">
+          {selectedOption
+            ? selectedOption[field.key]
+            : "Seleccione una opción..."}
+        </span>
+        <FontAwesomeIcon
+          icon={["fas", "chevron-down"]}
+          className={`text-xs text-gray-500 transition-transform ${
+            isOpen ? "transform rotate-180" : ""
+          }`}
+        />
       </div>
+
+      {/* Lista de opciones */}
+      {isOpen && (
+        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+          {loading ? (
+            <div className="px-4 py-2 text-sm text-gray-500">Cargando...</div>
+          ) : options.length === 0 ? (
+            <div className="px-4 py-2 text-sm text-gray-500">
+              No hay opciones disponibles
+            </div>
+          ) : (
+            <ul>
+              {options.map((option) => (
+                <li
+                  key={option[field.value]}
+                  className={`px-4 py-2 text-sm cursor-pointer ${
+                    value === option[field.value]
+                      ? "bg-blue-100 text-blue-800"
+                      : "hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleSelect(option)}
+                >
+                  {option[field.key]}
+                  {value === option[field.value] && (
+                    <FontAwesomeIcon
+                      icon={["fas", "check"]}
+                      className="ml-2 text-blue-600"
+                    />
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 };

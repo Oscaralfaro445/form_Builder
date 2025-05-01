@@ -12,16 +12,15 @@ export const Form = ({ fields }: FormProps) => {
     <div className="w-full max-w-2xl py-6 space-y-4">
       {fields.map((field: any) => (
         <div key={field.nomComponente} className="w-full">
-          {/* Input con todas las props necesarias para Formik */}
           <Input
             field={field}
-            name={field.nomComponente} // Asegúrate de pasar el name
-            value={formik.values[field.nomComponente] ?? ""}
+            name={field.nomComponente}
+            value={formik.values[field.nomComponente]}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            disabled={field.isDisabled}
           />
 
-          {/* Mensaje de error */}
           {formik.touched[field.nomComponente] &&
             formik.errors[field.nomComponente] && (
               <div className="text-red-500 text-sm mt-1">

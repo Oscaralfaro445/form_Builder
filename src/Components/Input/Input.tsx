@@ -11,7 +11,7 @@ type InputProps = {
   value: any;
   onChange: (e: React.ChangeEvent<any>) => void;
   onBlur: (e: React.FocusEvent<any>) => void;
-  [key: string]: any;
+  disabled: boolean;
 };
 
 export const Input = ({
@@ -20,7 +20,7 @@ export const Input = ({
   value,
   onChange,
   onBlur,
-  ...props
+  disabled,
 }: InputProps) => {
   const [show, setShow] = useState(false);
 
@@ -32,7 +32,7 @@ export const Input = ({
       value,
       onChange,
       onBlur,
-      ...props,
+      disabled,
     };
 
     switch (field.cveTipoCompon) {
@@ -49,7 +49,7 @@ export const Input = ({
       case InputTypeId.RELATION:
         return <Relation field={field} {...commonProps} />;
       case InputTypeId.COMBO:
-        return <Combo field={field as GenericField} {...commonProps} />;
+        return <Combo field={field} {...commonProps} />;
       case InputTypeId.SEPARADOR:
         return <SectionDivider />;
       default:
@@ -102,12 +102,11 @@ interface FieldInputProps {
 }
 
 const TextInput = ({
-  field,
   name,
   value,
   onChange,
   onBlur,
-  ...props
+  disabled,
 }: FieldInputProps) => (
   <input
     type="text"
@@ -116,19 +115,17 @@ const TextInput = ({
     value={value ?? ""}
     onChange={onChange}
     onBlur={onBlur}
-    disabled={field.isDisabled}
+    disabled={disabled}
     className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-    {...props}
   />
 );
 
 const NumberInput = ({
-  field,
   name,
   value,
   onChange,
   onBlur,
-  ...props
+  disabled,
 }: FieldInputProps) => (
   <input
     type="number"
@@ -137,19 +134,17 @@ const NumberInput = ({
     value={value ?? 0}
     onChange={onChange}
     onBlur={onBlur}
-    disabled={field.isDisabled}
+    disabled={disabled}
     className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-    {...props}
   />
 );
 
 const FechaInput = ({
-  field,
   name,
   value,
   onChange,
   onBlur,
-  ...props
+  disabled,
 }: FieldInputProps) => (
   <input
     type="date"
@@ -158,39 +153,24 @@ const FechaInput = ({
     value={value ?? ""}
     onChange={onChange}
     onBlur={onBlur}
-    disabled={field.isDisabled}
+    disabled={disabled}
     className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-    {...props}
   />
 );
 
-const Area = ({
-  field,
-  name,
-  value,
-  onChange,
-  onBlur,
-  ...props
-}: FieldInputProps) => (
+const Area = ({ name, value, onChange, onBlur, disabled }: FieldInputProps) => (
   <textarea
     id={name}
     name={name}
     value={value ?? ""}
     onChange={onChange}
     onBlur={onBlur}
-    disabled={field.isDisabled}
+    disabled={disabled}
     className="mt-1 text-gray-500 block w-full shadow-sm sm:text-sm focus:border-indigo-700 border-gray-300 rounded-md focus:ring-0"
-    {...props}
   />
 );
 
-const Switch = ({
-  field,
-  name,
-  value,
-  onChange,
-  ...props
-}: FieldInputProps) => (
+const Switch = ({ name, value, onChange, disabled }: FieldInputProps) => (
   <div className="relative inline-block w-10 mr-2 pt-3 align-middle select-none transition duration-700 ease-in">
     <input
       type="checkbox"
@@ -198,9 +178,8 @@ const Switch = ({
       name={name}
       checked={!!value}
       onChange={onChange}
-      disabled={field.isDisabled}
+      disabled={disabled}
       className="toggle-checkbox absolute block w-5 h-5 border-gray-300 rounded-full bg-white focus:ring-offset-0 focus:ring-0 hover:bg-white appearance-none cursor-pointer"
-      {...props}
     />
     <label
       htmlFor={name}

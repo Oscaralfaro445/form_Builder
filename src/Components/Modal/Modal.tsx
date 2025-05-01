@@ -90,7 +90,7 @@ export const Modal = ({
                         </div>
                       </div>
                     </div>
-
+                    {console.log(formik.isValid)}
                     <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                       <button
                         className={`w-full inline-flex items-center justify-center rounded-md border shadow-sm px-4 text-base font-medium text-gray-500 border-gray-400 sm:ml-3 sm:w-auto sm:text-sm ${!formik.isValid ? "opacity-50" : ""}`}
